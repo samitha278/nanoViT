@@ -3,7 +3,11 @@ Vision Transformer (ViT) implementations from scratch
 
 
 
+## ViT Architecture
 
+<p align="center">
+  <img src="images/vit.png" alt="ViT architecture" width="400"/>
+</p>
 
 
 
