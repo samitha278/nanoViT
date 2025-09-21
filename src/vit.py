@@ -111,3 +111,38 @@ class Block(nn.Module):
 
 
 
+class PatchEmbd(nn.Module):
+    
+    def __init__(self):
+      super().__init__()
+      
+      pass
+  
+  
+  
+    def forward(self,x):
+        pass
+
+
+
+
+# _____________________________________________________________________________
+
+
+class ViT(nn.Module):
+    
+    def __init__(self):
+      super().__init__()
+      
+      
+      pass
+  
+
+
+    def forward(self,x):
+        
+        pass 
+    
+    
+
+# _____________________________________________________________________________
