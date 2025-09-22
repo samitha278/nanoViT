@@ -178,17 +178,50 @@ class PatchEmbedding(nn.Module):
 
 class ViT(nn.Module):
     
-    def __init__(self):
+    def __init__(self,config):
       super().__init__()
       
+
+      self.config = config
+
+      self.embd = PatchEmbedding(config)
       
-      pass
+      self.block = nn.ModuleList([Block(config)  for i in range(config.n_layer)])
+
+
+      self.ln = nn.LayerNorm(config.n_embd)
+
+      self.layer = nn.Linear(config.n_embd,config.num_classes)
+
+      
   
 
 
-    def forward(self,x):
+    def forward(self,x,targets = None):
         
-        pass 
+      B,C,H,W = x.shape
+      
+
+      #embedding
+      out =  self.embd(x)
+      
+      #blocks
+      for block in self.block:
+        out = block(out)
+
+      #layer norm
+      out = self.ln(out)
+
+      #linear layer 
+      out = self.layer(out[:,0])  
+
+
+      if targets is None:
+        return out
+      else:
+        return F.cross_entropy(out,targets.view(-1))
+
+
     
     
 
