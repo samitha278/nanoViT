@@ -111,17 +111,64 @@ class Block(nn.Module):
 
 
 
-class PatchEmbd(nn.Module):
+class PatchEmbedding(nn.Module):
+
+
+
+  def __init__(self,config):
+    super().__init__()
     
-    def __init__(self):
-      super().__init__()
-      
-      pass
+    self.config = config
+
+    self.n_patches = config.n_patch
+    self.patch_dim = config.im_channels* config.patch_size ** 2
+
+
+    #patch embedding
+    self.patch_embd = nn.Sequential(
+        nn.LayerNorm(self.patch_dim),
+        nn.Linear(self.patch_dim,config.n_embd),
+        nn.LayerNorm(config.n_embd)
+    )
+
+    #cls tokens
+    self.cls_token = nn.Parameter(torch.randn((config.n_embd,)))
+
+    #possitional embedding
+    self.pos_embd = nn.Embedding(self.n_patches+1,config.n_embd)    # +1 for cls token
+
+
+    
+
+
+  def forward(self,x):
+
+    B,C,H,W = x.shape    
+
+    # B,C,H,W -> B, n_patches , patch_dim    # patch_dim = C* patch_size*patch_size
+
+    patch_size = self.config.patch_size
+
+    patches = F.unfold(x, patch_size, stride = patch_size).transpose(-1,-2) 
+
+    #patch embedding
+    patch_embd = self.patch_embd(patches)        # B, n_patches , n_embd
+
+    #class token
+    class_tok = self.cls_token.expand(B,1,-1)     # B , 1 , n_embd
+
+
+    patch_embd = torch.cat((class_tok,patch_embd),dim =1 )    # B, n_patches +1  , n_embd
+
+    #positional embedding
+    pos_embd = self.pos_embd(torch.arange(0,self.n_patches+1))     # B, n_patches +1  , n_embd
+
+    out = patch_embd + pos_embd
+
+    return out
+
+
   
-  
-  
-    def forward(self,x):
-        pass
 
 
 
