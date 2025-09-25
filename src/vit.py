@@ -2,113 +2,87 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from dataclasses import dataclass
+
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 
 
 
+#_______________________________________________________________________________
+
+
+@dataclass
+class ViTConfig:
+    batch_size: int = 32
+    num_classes: int = 10
+    img_size: int = 224
+    im_channels: int = 3
+    patch_size: int = 16
+
+    n_head: int = 4
+    n_layer: int = 4
+    n_embd: int = 1024
+
+    @property
+    def n_patch(self):
+        return (self.img_size//self.patch_size)**2
+ 
+
+#_______________________________________________________________________________
 
 
 
-# _____________________________________________________________________________
+class ViT(nn.Module):
+
+    def __init__(self,config):
+      super().__init__()
 
 
+      self.config = config
 
-class Attention(nn.Module):
+      self.embd = PatchEmbedding(config)
 
-
-  def __init__(self,n_embd,n_head) :
-    super().__init__()
-
-    self.nh = n_head
-
-    self.w = nn.Linear(n_embd,3*n_embd)    # 3 * n_head * head_size
-    self.proj = nn.Linear(n_embd,n_embd)
+      self.block = nn.ModuleList([Block(config)  for i in range(config.n_layer)])
 
 
-  def forward(self,x):
-    
-    B,T,C = x.shape
-    
-    wei = self.w(x)        # B,T, 3* C 
+      self.ln = nn.LayerNorm(config.n_embd)
 
-    k,q,v = torch.chunk(wei,3, dim = -1)      # each B,T,C
-
-    head_size = C//self.nh
-
-    key   = k.view(B, T, self.nh, head_size).transpose(1, 2)    # B, n_head, T, head_size
-    query = q.view(B, T, self.nh, head_size).transpose(1, 2)    # ""
-    value = v.view(B, T, self.nh, head_size).transpose(1, 2)
-
-
-    weight = ( query @ key.transpose(-1,-2) )  * (head_size ** -0.5)    #B,nh,T,T
-    weight = F.softmax(weight,dim = -1)
-
-    out = weight @ value      #B,nh,T,n_head
-
-    out.transpose(1,2)
-
-    out = self.proj(out.view(B,T,C))
-
-    return out
-
-
-
-# _____________________________________________________________________________
-
-
-class MLP(nn.Module):
-
-
-  def __init__(self,n_embd):
-    super().__init__()
-
-
-    self.layer = nn.Linear(n_embd,4*n_embd)
-    self.gelu = nn.GELU()
-    self.proj = nn.Linear(4*n_embd,n_embd)
-
-
-
-  def forward(self,x):
-    
-
-    x = self.gelu(self.layer(x))
-    x = self.proj(x)
-    
-    return x
-
-
-
-# _____________________________________________________________________________
+      self.layer = nn.Linear(config.n_embd,config.num_classes)
 
 
 
 
-class Block(nn.Module):
+
+    def forward(self,x,targets = None):
+
+      B,C,H,W = x.shape
 
 
-  def __init__(self,n_layer,n_embd,n_head):
-    super().__init__()
+      #embedding
+      out =  self.embd(x)
+
+      #blocks
+      for block in self.block:
+        out = block(out)
+
+      #layer norm
+      out = self.ln(out)
+
+      #linear layer
+      logits = self.layer(out[:,0])
 
 
-    self.ln_1 = nn.LayerNorm(n_embd)
-    self.attn = Attention(n_embd,n_head)
-    self.ln_2 = nn.LayerNorm(n_embd)
-    self.mlp = MLP(n_embd)
+      loss = None
+      if targets is not None:
+          loss = F.cross_entropy(logits, targets)
 
-
-  def forward(self,x):
-
-    x = x + self.attn(self.ln_1(x))
-    x = x + self.mlp(self.ln_2(x))
-
-    return x
+      return logits, loss 
 
 
 
-# _____________________________________________________________________________
-
+#_______________________________________________________________________________
 
 
 class PatchEmbedding(nn.Module):
@@ -117,7 +91,7 @@ class PatchEmbedding(nn.Module):
 
   def __init__(self,config):
     super().__init__()
-    
+
     self.config = config
 
     self.n_patches = config.n_patch
@@ -138,18 +112,18 @@ class PatchEmbedding(nn.Module):
     self.pos_embd = nn.Embedding(self.n_patches+1,config.n_embd)    # +1 for cls token
 
 
-    
+
 
 
   def forward(self,x):
 
-    B,C,H,W = x.shape    
+    B,C,H,W = x.shape
 
     # B,C,H,W -> B, n_patches , patch_dim    # patch_dim = C* patch_size*patch_size
 
     patch_size = self.config.patch_size
 
-    patches = F.unfold(x, patch_size, stride = patch_size).transpose(-1,-2) 
+    patches = F.unfold(x, patch_size, stride = patch_size).transpose(-1,-2)
 
     #patch embedding
     patch_embd = self.patch_embd(patches)        # B, n_patches , n_embd
@@ -168,61 +142,101 @@ class PatchEmbedding(nn.Module):
     return out
 
 
+
+
+
+#_______________________________________________________________________________
+
+
+
+class Block(nn.Module):
+
+
+  def __init__(self,config):
+    super().__init__()
+
+
+
+    self.ln_1 = nn.LayerNorm(config.n_embd)
+    self.attn = Attention(config.n_embd,config.n_head)
+    self.ln_2 = nn.LayerNorm(config.n_embd)
+    self.mlp = MLP(config.n_embd)
+
+
+  def forward(self,x):
+
+    x = x + self.attn(self.ln_1(x))
+    x = x + self.mlp(self.ln_2(x))
+
+    return x
+
+
+#_______________________________________________________________________________
+
+
+class MLP(nn.Module):
+
+
+  def __init__(self,n_embd):
+    super().__init__()
+
+
+    self.layer = nn.Linear(n_embd,4*n_embd)
+    self.gelu = nn.GELU()
+    self.proj = nn.Linear(4*n_embd,n_embd)
+
+
+
+  def forward(self,x):
+
+
+    x = self.gelu(self.layer(x))
+    x = self.proj(x)
+
+    return x
+
+
+#_______________________________________________________________________________
+
+
+class Attention(nn.Module):
+
+
+  def __init__(self,n_embd,n_head) :
+    super().__init__()
+
+    self.nh = n_head
+
+    self.w = nn.Linear(n_embd,3*n_embd)    # 3 * n_head * head_size
+    self.proj = nn.Linear(n_embd,n_embd)
+
+
+  def forward(self,x):
+
+    B,T,C = x.shape
+
+    wei = self.w(x)        # B,T, 3* C
+
+    k,q,v = torch.chunk(wei,3, dim = -1)      # each B,T,C
+
+    head_size = C//self.nh
+
+    key   = k.view(B, T, self.nh, head_size).transpose(1, 2)    # B, n_head, T, head_size
+    query = q.view(B, T, self.nh, head_size).transpose(1, 2)    # ""
+    value = v.view(B, T, self.nh, head_size).transpose(1, 2)
+
+
+    weight = ( query @ key.transpose(-1,-2) )  * (head_size ** -0.5)    #B,nh,T,T
+    weight = F.softmax(weight,dim = -1)
+
+    out = weight @ value      #B,nh,T,n_head
+
+
+
+    out = out.transpose(1,2).view(B,T,C)    #B,T,nh,n_head
+
+    out = self.proj(out)
+
+    return out
   
-
-
-
-
-# _____________________________________________________________________________
-
-
-class ViT(nn.Module):
-    
-    def __init__(self,config):
-      super().__init__()
-      
-
-      self.config = config
-
-      self.embd = PatchEmbedding(config)
-      
-      self.block = nn.ModuleList([Block(config)  for i in range(config.n_layer)])
-
-
-      self.ln = nn.LayerNorm(config.n_embd)
-
-      self.layer = nn.Linear(config.n_embd,config.num_classes)
-
-      
   
-
-
-    def forward(self,x,targets = None):
-        
-      B,C,H,W = x.shape
-      
-
-      #embedding
-      out =  self.embd(x)
-      
-      #blocks
-      for block in self.block:
-        out = block(out)
-
-      #layer norm
-      out = self.ln(out)
-
-      #linear layer 
-      out = self.layer(out[:,0])  
-
-
-      if targets is None:
-        return out
-      else:
-        return F.cross_entropy(out,targets.view(-1))
-
-
-    
-    
-
-# _____________________________________________________________________________
