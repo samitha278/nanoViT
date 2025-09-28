@@ -14,21 +14,25 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 @dataclass
-class ViTConfig:
-    batch_size: int = 32
+class Config:
     num_classes: int = 10
-    img_size: int = 224
-    im_channels: int = 3
-    patch_size: int = 16
+    img_size: int = 28
+    im_channels: int = 1
+    patch_size: int = 4
 
     n_head: int = 4
     n_layer: int = 4
-    n_embd: int = 1024
+    n_embd: int = 768
+
+    dropout = 0.2
 
     @property
     def n_patch(self):
         return (self.img_size//self.patch_size)**2
- 
+
+
+
+
 
 #_______________________________________________________________________________
 
@@ -71,14 +75,13 @@ class ViT(nn.Module):
       out = self.ln(out)
 
       #linear layer
-      logits = self.layer(out[:,0])
+      out = self.layer(out[:,0])
 
 
-      loss = None
-      if targets is not None:
-          loss = F.cross_entropy(logits, targets)
-
-      return logits, loss 
+      if targets is None:
+        return out
+      else:
+        return out,F.cross_entropy(out,targets.view(-1))
 
 
 
@@ -106,7 +109,7 @@ class PatchEmbedding(nn.Module):
     )
 
     #cls tokens
-    self.cls_token = nn.Parameter(torch.randn((config.n_embd,)))
+    self.cls_token = nn.Parameter(torch.randn((config.n_embd,),device=device))
 
     #possitional embedding
     self.pos_embd = nn.Embedding(self.n_patches+1,config.n_embd)    # +1 for cls token
@@ -135,7 +138,7 @@ class PatchEmbedding(nn.Module):
     patch_embd = torch.cat((class_tok,patch_embd),dim =1 )    # B, n_patches +1  , n_embd
 
     #positional embedding
-    pos_embd = self.pos_embd(torch.arange(0,self.n_patches+1))     # B, n_patches +1  , n_embd
+    pos_embd = self.pos_embd(torch.arange(0,self.n_patches+1,device=device))     # B, n_patches +1  , n_embd
 
     out = patch_embd + pos_embd
 
@@ -184,7 +187,7 @@ class MLP(nn.Module):
     self.layer = nn.Linear(n_embd,4*n_embd)
     self.gelu = nn.GELU()
     self.proj = nn.Linear(4*n_embd,n_embd)
-
+    self.dropout = nn.Dropout(0.2)
 
 
   def forward(self,x):
@@ -192,6 +195,7 @@ class MLP(nn.Module):
 
     x = self.gelu(self.layer(x))
     x = self.proj(x)
+    x = self.dropout(x)
 
     return x
 
@@ -226,10 +230,14 @@ class Attention(nn.Module):
     value = v.view(B, T, self.nh, head_size).transpose(1, 2)
 
 
-    weight = ( query @ key.transpose(-1,-2) )  * (head_size ** -0.5)    #B,nh,T,T
-    weight = F.softmax(weight,dim = -1)
+    # weight = ( query @ key.transpose(-1,-2) )  * (head_size ** -0.5)    #B,nh,T,T
+    # weight = F.softmax(weight,dim = -1)
 
-    out = weight @ value      #B,nh,T,n_head
+    # out = weight @ value      #B,nh,T,n_head
+
+
+    #Flash Attention
+    out = F.scaled_dot_product_attention(query,key,value)
 
 
 
@@ -238,5 +246,4 @@ class Attention(nn.Module):
     out = self.proj(out)
 
     return out
-  
-  
+
