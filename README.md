@@ -73,7 +73,7 @@ patch size     = 4 x 4
 
 
 ---
-### Step 1 
+### Step 2
 
 - Trained on T4 GPU (free Google Colab)
 
@@ -127,6 +127,59 @@ Time for just one iteration
 
 **Validation accuracy**
 - 0.8095
+
+
+
+
+---
+
+
+
+### Step 3
+
+- Above model for CIFAR10 Trained on T4 GPU
+
+
+
+**Training Configuration**
+```
+Max Iterations = 1000
+Learning Rate  = 3e-4  
+Batch Size     = 32  
+
+CIFAR Dataset :
+image size     = 32 x 32 
+image channels = 3
+patch size     = 8 x 8 
+```
+
+<table>
+  <tr>
+    <td valign="top" width="50%">
+      <h4>Training Results</h4>
+      <pre>
+100/1000  2.3094  40.5657 ms
+200/1000  2.1336  37.4801 ms
+300/1000  2.3655  38.1184 ms
+400/1000  1.8908  39.4473 ms
+500/1000  1.8144  38.4216 ms
+600/1000  1.7888  39.7465 ms
+700/1000  2.0120  39.7189 ms
+800/1000  1.7470  40.0531 ms
+900/1000  1.9166  40.8957 ms
+Time for just one iteration
+      </pre>
+    </td>
+    <td valign="top" width="50%">
+      <h4>Loss Curve</h4>
+      <img src="images/s3.png" alt="Loss curve - Step 3" width="420"/>
+    </td>
+  </tr>
+</table>
+
+**Validation accuracy**
+- 0.2684
+- Need to Improve
 
 
 ---
