@@ -147,7 +147,7 @@ Max Iterations = 1000
 Learning Rate  = 3e-4  
 Batch Size     = 32  
 
-CIFAR Dataset :
+CIFAR10 Dataset :
 image size     = 32 x 32 
 image channels = 3
 patch size     = 8 x 8 
@@ -183,6 +183,70 @@ Time for just one iteration
 
 
 ---
+
+
+
+
+### Step 4 
+- Training Techniques
+- LR Schedule 
+- Weight Decay : AdamW (decoupled Adam)
+- Gradient Clipping
+
+**Training Configuration**
+```
+Max Iterations = 1000 
+Batch Size     = 32  
+
+CIFAR10 Dataset :
+image size     = 32 x 32 
+image channels = 3
+patch size     = 8 x 8 
+```
+
+
+
+<table>
+  <tr>
+    <td valign="top" width="50%">
+      <h4>Training Results</h4>
+      <pre>
+0/1000  2.3342  23087.0581 ms   norm:7.0133   lr:1.2000e-05
+100/1000  2.4822  37.9224 ms   norm:7.2206   lr:7.9537e-04
+200/1000  2.5106  40.9629 ms   norm:6.9095   lr:7.5307e-04
+300/1000  2.3512  37.1890 ms   norm:7.1988   lr:6.8768e-04
+400/1000  1.9129  38.3921 ms   norm:5.2334   lr:6.0628e-04
+500/1000  1.8971  36.9473 ms   norm:5.1916   lr:5.1770e-04
+600/1000  1.8100  37.8897 ms   norm:3.7129   lr:4.3154e-04
+700/1000  1.9884  37.7500 ms   norm:3.8145   lr:3.5713e-04
+800/1000  1.8460  40.1011 ms   norm:3.9867   lr:3.0254e-04
+900/1000  1.8357  37.7097 ms   norm:3.8326   lr:2.7368e-04
+Time for just one Iteration
+      </pre>
+      <h4>LR Schedule: Warm up + Cosine decay</h4>
+      <img src="images/s4__.png" alt="Lrs - Step 3" width="300"/>
+    </td>
+    <td valign="top" width="50%">
+      <h4>Loss Curve</h4>
+      <img src="images/s4.png" alt="Loss curve - Step 3" width="400"/>
+      <h4>Norms</h4>
+      <img src="images/s4_.png" alt="Norms - Step 3" width="400"/>
+    </td>
+  </tr>
+</table>
+
+**Validation accuracy**
+```
+0.2956 : Batch Size = 32
+```
+
+---
+
+
+
+
+
+
 
 ## References
 - [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/pdf/2010.11929)

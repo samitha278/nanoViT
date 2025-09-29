@@ -40,21 +40,53 @@ torch.manual_seed(278)
 if torch.cuda.is_available():
     torch.cuda.manual_seed(278)
 
-max_iter = 1000
-lr = 6e-4
 
 
-vit = ViT(Config(img_size=32,im_channels=3,patch_size=8))
+
+vit = ViT(Config())
 vit = vit.to(device)
 vit = torch.compile(vit)
 
 
-use_fused = True if torch.cuda.is_available() else False
-optimizer = torch.optim.AdamW(vit.parameters(),lr = lr,fused = use_fused)
+#------------------------------------------------------------------------------4
+
+max_iter = 1000
+warm_up = max_iter *0.05
+max_lr = 6e-4
+min_lr = max_lr * 0.1
+
+
+
+def get_lr(i):
+
+    if i < warm_up:
+        return (max_lr/warm_up) * (i+1)
+
+    if i>max_iter :
+        return min_lr
+
+    # cosine decay
+    diff = max_lr - min_lr
+    steps = max_iter - warm_up
+    lr = (diff/2) * math.cos(i * (math.pi / steps)) + diff
+    return lr
+
+
+#------------------------------------------------------------------------------
+
 
 losses = torch.zeros((max_iter,))
+lrs = torch.zeros((max_iter,))
+norms = torch.zeros((max_iter,))
 
-train_data_iter = iter(train_data) 
+
+
+# Optimizer
+use_fused = True if torch.cuda.is_available() else False
+optimizer = torch.optim.AdamW(vit.parameters(),lr = max_lr,weight_decay = 0.1,fused = use_fused)
+
+
+train_data_iter = iter(train_data)
 
 for i in range(max_iter):
 
@@ -74,6 +106,16 @@ for i in range(max_iter):
 
     optimizer.zero_grad()
     loss.backward()
+
+
+    # LR Schedule
+    lr = get_lr(i)
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
+    
+    # Gradient Clipping
+    norm = torch.nn.utils.clip_grad_norm_(vit.parameters(),1.0)
+
     optimizer.step()
 
     torch.cuda.synchronize() if torch.cuda.is_available() else None
@@ -82,8 +124,10 @@ for i in range(max_iter):
     dt = (t1-t0) * 1000 # ms
 
     losses[i] = loss.item()
+    lrs[i] = lr
+    norms[i] = norm
 
-    if i%100 ==0 : print(f'{i}/{max_iter}  {loss.item():.4f}  {dt:.4f} ms')
+    if i%100 ==0 : print(f'{i}/{max_iter}  {loss.item():.4f}  {dt:.4f} ms   norm:{norm.item():.4f}   lr:{lr:.4e}')
 
 
 
