@@ -43,14 +43,14 @@ if torch.cuda.is_available():
 
 
 
-vit = ViT(Config())
+vit = ViT(Config(img_size=32,im_channels=3,patch_size=8,n_head=8,n_layer=8,n_embd=1024))
 vit = vit.to(device)
 vit = torch.compile(vit)
 
 
 #------------------------------------------------------------------------------4
 
-max_iter = 1000
+max_iter = 10000
 warm_up = max_iter *0.05
 max_lr = 6e-4
 min_lr = max_lr * 0.1

@@ -18,6 +18,11 @@ Vision Transformer (ViT) implementations from scratch
 ---
 
 
+
+
+## Progress
+
+
 ## Vision Transformer Model Configuration
 ```
 n_layer    = 4
@@ -25,11 +30,6 @@ n_head     = 4
 n_embd     = 768 
  
 ```
-
----
-
-
-## Progress
 
 
 ### Step 1 
@@ -224,13 +224,13 @@ patch size     = 8 x 8
 Time for just one Iteration
       </pre>
       <h4>LR Schedule: Warm up + Cosine decay</h4>
-      <img src="images/s4__.png" alt="Lrs - Step 3" width="300"/>
+      <img src="images/s4__.png" alt="Lrs - Step 4" width="300"/>
     </td>
     <td valign="top" width="50%">
       <h4>Loss Curve</h4>
-      <img src="images/s4.png" alt="Loss curve - Step 3" width="400"/>
+      <img src="images/s4.png" alt="Loss curve - Step 4" width="400"/>
       <h4>Norms</h4>
-      <img src="images/s4_.png" alt="Norms - Step 3" width="400"/>
+      <img src="images/s4_.png" alt="Norms - Step 4" width="400"/>
     </td>
   </tr>
 </table>
@@ -243,8 +243,63 @@ Time for just one Iteration
 ---
 
 
+## Vision Transformer Model Configuration
+```
+n_layer    = 8
+n_head     = 8
+n_embd     = 1024
+ 
+```
+### Step 5 
+
+- Change Config , Increase max_iter and Train
+
+**Training Configuration**
+```
+Max Iterations = 10000
+Batch Size     = 32  
+
+CIFAR10 Dataset :
+image size     = 32 x 32 
+image channels = 3
+patch size     = 8 x 8 
+```
 
 
+
+<table>
+  <tr>
+    <td valign="top" width="50%">
+      <h4>Training Results</h4>
+      <pre>
+0/10000  2.5523  187.0518 ms   norm:10.4012   lr:1.2000e-06
+1000/10000  1.9406  132.7546 ms   norm:5.6361   lr:7.9537e-04
+2000/10000  1.8547  131.8426 ms   norm:3.7117   lr:7.5307e-04
+3000/10000  1.9597  132.9753 ms   norm:10.2523   lr:6.8768e-04
+4000/10000  1.8329  135.6885 ms   norm:1.9468   lr:6.0628e-04
+5000/10000  1.8347  132.1881 ms   norm:2.7930   lr:5.1770e-04
+6000/10000  1.8799  131.2051 ms   norm:1.9949   lr:4.3154e-04
+7000/10000  1.7693  133.7743 ms   norm:2.2332   lr:3.5713e-04
+8000/10000  1.4898  135.7555 ms   norm:3.1812   lr:3.0254e-04
+9000/10000  1.7591  130.5749 ms   norm:2.8663   lr:2.7368e-04
+Time for just one Iteration
+      </pre>
+    </td>
+    <td valign="top" width="50%">
+      <h4>Loss Curve</h4>
+      <img src="images/s5.png" alt="Loss curve - Step 5" width="400"/>
+      <h4>Norms</h4>
+      <img src="images/s5_.png" alt="Norms - Step 5" width="400"/>
+    </td>
+  </tr>
+</table>
+
+**Validation accuracy**
+```
+0.3665 : Batch Size = 32
+```
+
+---
 
 
 
