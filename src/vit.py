@@ -187,7 +187,7 @@ class MLP(nn.Module):
     self.layer = nn.Linear(n_embd,4*n_embd)
     self.gelu = nn.GELU()
     self.proj = nn.Linear(4*n_embd,n_embd)
-    self.dropout = nn.Dropout(0.2)
+    self.dropout = nn.Dropout(0.1)
 
 
   def forward(self,x):
