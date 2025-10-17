@@ -449,7 +449,7 @@ Next **Evaluation**
 - {'top1_accuracy': 70.58, 'top5_accuracy': 90.42}
 
 - SWA model for 5 chechpoints: 280K - 330K .pt
-- {'top1_accuracy': 74.22, 'top5_accuracy': 91.60000000000001}
+- {'top1_accuracy': 74.22, 'top5_accuracy': 91.60}
 
 - SWA model for 10 chechpoints: 250K - 350K .pt
 -{'top1_accuracy': 74.26, 'top5_accuracy': 91.88}

@@ -10,7 +10,7 @@ import time
 import math
 import os
 
-from vit import ViT
+from src.models.vit import ViT
 
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'

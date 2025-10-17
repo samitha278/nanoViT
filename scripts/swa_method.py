@@ -66,7 +66,7 @@ def create_swa_model(checkpoint_paths, model_template, device='cuda'):
 
 
 
-from src.vit import ViT,ViTBaseConfig
+from src.models.vit import ViT,ViTBaseConfig
 from src.data.dataset import get_val_dataloader
 
 # Initialize model template
