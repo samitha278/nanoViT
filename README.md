@@ -399,6 +399,7 @@ ViT Base
 n_layer    = 12
 n_head     = 12
 n_embd     = 768
+mlp_hidden = 4 * n_embd
 
 Total parameters = ~86M
 ```
@@ -406,12 +407,16 @@ Total parameters = ~86M
 
 **Training Configuration**
 ```
-Max Iterations = 10000
+Max Iterations = 400000
 Batch Size     = 32  
+Warmup Ratio   = 0.05     (LR Schedule: Warmup + Cosine Decay)
+Max lr         = 3e-4     (Min lr = 3e-5)
 Dropout        = 0.1
-Weight Decay   = 0.1
-
-IMAGENET100 Dataset :
+Weight Decay   = 0.1      (Optimizer AdamW)
+Gradint Clip   = 1.0
+```
+[IMAGENET100 Dataset](https://huggingface.co/datasets/clane9/imagenet-100):
+```
 image size     = 224 x 224 
 image channels = 3
 patch size     = 16 x 16   **
@@ -423,7 +428,6 @@ patch size     = 16 x 16   **
   <tr>
     <td valign="top" width="50%">
       <h4>Training Results</h4>
-      <h4>Loss Curve</h4>
       <img src="images/s7_.png" alt="Training Results" width="420"/>
     </td>
     <td valign="top" width="50%">
@@ -433,8 +437,9 @@ patch size     = 16 x 16   **
   </tr>
 </table>
 
-Min Train Loss: 1.8e-05
-Min Validation Loss: 1.1369
+- Min Train Loss: 1.8e-05
+- Min Validation Loss: 1.1369
+- Best model checkpoint : 300000 step
 
 Next **Evaluation** 
 
