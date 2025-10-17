@@ -55,7 +55,7 @@ def main():
     
     # Load model
     model = ViT(ViTBaseConfig)
-    checkpoint = torch.load('log/model_01000.pth')       # change path  
+    checkpoint = torch.load('/home/samitha/Projects/nanoViT/src/log/model_300000.pt')       # change path  
     model.load_state_dict(checkpoint['model_state_dict'])
     model.to(device)
     

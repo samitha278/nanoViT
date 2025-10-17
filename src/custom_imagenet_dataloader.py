@@ -72,10 +72,10 @@ val_loader = DataLoader(dataset['validation'],val_transform,batch_size)
 
 
 # temp get data
-xb,yb = train_loader.get_batch()
-xb,yb = xb.to(device),yb.to(device)
-print(xb,yb)
+# xb,yb = train_loader.get_batch()
+# xb,yb = xb.to(device),yb.to(device)
+# print(xb,yb)
 
 
 
-# Train ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
