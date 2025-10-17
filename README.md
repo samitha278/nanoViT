@@ -445,7 +445,21 @@ Next **Evaluation**
 
 
 ---
+- Minimum val loss model (300000 step)
+- {'top1_accuracy': 70.58, 'top5_accuracy': 90.42}
 
+- SWA model for 5 chechpoints: 280K - 330K .pt
+- {'top1_accuracy': 74.22, 'top5_accuracy': 91.60000000000001}
+
+- SWA model for 10 chechpoints: 250K - 350K .pt
+-{'top1_accuracy': 74.26, 'top5_accuracy': 91.88}
+
+- SWA model last 13 checkpoints : 280K - 399999 .pt
+- {'top1_accuracy': 74.46, 'top5_accuracy': 91.52}
+
+- SWA model last 5 checkpoints
+- {'top1_accuracy': 74.42, 'top5_accuracy': 91.12}
+---
 
 
 ## References

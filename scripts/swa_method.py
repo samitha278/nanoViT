@@ -2,6 +2,10 @@ import torch
 import copy
 from pathlib import Path
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 torch.manual_seed(278)
@@ -75,13 +79,13 @@ from pathlib import Path
 
 checkpoint_dir = Path('/home/samitha/Projects/nanoViT/src/log/')
 all_checkpoints = sorted(checkpoint_dir.glob('*.pt'))
-selected_checkpoints = all_checkpoints[11:22]
+selected_checkpoints = all_checkpoints[5:]
 
 
 swa_model = create_swa_model(selected_checkpoints,model_template,device)
 
 # Save
-output_path = '/home/samitha/Projects/nanoViT/src/log/swa_model.pt'
+output_path = '/home/samitha/Projects/nanoViT/src/log/swa_model_all.pt'
 torch.save(swa_model.state_dict(), output_path)
 print(f"\n SWA model saved to: {output_path}")
 

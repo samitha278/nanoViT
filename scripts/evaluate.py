@@ -1,5 +1,8 @@
 import torch
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.vit import ViT, ViTBaseConfig
 from src.evaluation import evaluate
@@ -15,7 +18,7 @@ if torch.cuda.is_available():
 config = ViTBaseConfig()
 model = ViT(config)
 
-checkpoint = torch.load('/home/samitha/Projects/nanoViT/src/log/model_300000.pt',map_location='cuda') 
+checkpoint = torch.load('/home/samitha/Projects/nanoViT/src/log/swa_model_29to_last.pt',map_location='cuda') 
 model.load_state_dict(checkpoint['model'])
 model.to(device)
 
