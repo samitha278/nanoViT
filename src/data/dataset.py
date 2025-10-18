@@ -57,10 +57,10 @@ class ImageNet100(Dataset):
         return img, label
 
 
-def get_dataloaders(dataset_path,batch_size = 32):
+def get_dataloaders(dataset_path,batch_size = 32,streaming =  False):
     
     # Load dataset
-    dataset = load_dataset(dataset_path)
+    dataset = load_dataset(dataset_path,streaming=streaming)
     
     # Get transforms
     train_transform = get_transforms(is_train=True)
@@ -89,10 +89,10 @@ def get_dataloaders(dataset_path,batch_size = 32):
         persistent_workers=True
     )
     
-    print(f"Train samples: {len(train_ds)}")
-    print(f"Val samples: {len(val_ds)}")
-    print(f"Train batches: {len(train_loader)}")
-    print(f"Val batches: {len(val_loader)}")
+    # print(f"Train samples: {len(train_ds)}")
+    # print(f"Val samples: {len(val_ds)}")
+    # print(f"Train batches: {len(train_loader)}")
+    # print(f"Val batches: {len(val_loader)}")
     
     return train_loader, val_loader
 

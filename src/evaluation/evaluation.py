@@ -44,6 +44,9 @@ def evaluate(model,val_loader,classes,device):
     top5_preds = np.argsort(all_probs, axis=1)[:, -5:]
     top5_acc = 100. * np.mean([all_labels[i] in top5_preds[i] for i in range(len(all_labels))])
     
+    
+    # return (top1_acc,top5_acc)
+    
     # Per class accuracy
     per_class_acc = {}
     for i, cls in enumerate(classes):
