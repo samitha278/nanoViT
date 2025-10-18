@@ -10,5 +10,7 @@ build/
 .eggs/
 
 
-/home/samitha/Projects/nanoViT/src/__pycache__/
-/home/samitha/Projects/nanoViT/src/__pycache__/vit.cpython-310.pyc
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
