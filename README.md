@@ -462,5 +462,19 @@ Next **Evaluation**
 ---
 
 
+
+### Attention Visualization
+- Attention Rollout Algorithm
+
+<p align="center">
+  <img src="E:\Users\LENOVO\Documents\VSCode\nanoViT\experiments\attention_viz\attention_0.png" alt="attn1" width="320"/>
+</p>
+<p align="center">
+  <img src="E:\Users\LENOVO\Documents\VSCode\nanoViT\experiments\attention_viz\attention_3.png" alt="attn2" width="320"/>
+</p>
+
+---
+
+
 ## References
 - [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/pdf/2010.11929)
